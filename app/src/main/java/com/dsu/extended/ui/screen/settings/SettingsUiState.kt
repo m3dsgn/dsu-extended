@@ -1,0 +1,39 @@
+package com.dsu.extended.ui.screen.settings
+
+import com.dsu.extended.preferences.AppPrefs
+import com.dsu.extended.ui.theme.ColorPaletteStyle
+import com.dsu.extended.ui.theme.ThemeMode
+import com.dsu.extended.ui.theme.UiStyle
+import com.dsu.extended.util.PreferredPrivilegedMode
+
+enum class DialogSheetState {
+    NONE,
+    BUILT_IN_INSTALLER,
+    DISABLE_STORAGE_CHECK,
+    UI_STYLE_SELECTOR,
+    OPERATION_MODE_SELECTOR,
+    THEME_MODE_SELECTOR,
+    COLOR_STYLE_SELECTOR,
+}
+
+data class SettingsUiState(
+    val preferences: HashMap<String, Boolean> = hashMapOf(
+        AppPrefs.USE_BUILTIN_INSTALLER to false,
+        AppPrefs.KEEP_SCREEN_ON to false,
+        AppPrefs.UMOUNT_SD to false,
+        AppPrefs.DISABLE_STORAGE_CHECK to false,
+        AppPrefs.FULL_LOGCAT_LOGGING to false,
+    ),
+    val dialogSheetDisplay: DialogSheetState = DialogSheetState.NONE,
+    val isRoot: Boolean = false,
+    val hasRootAccess: Boolean = false,
+    val hasShizukuAccess: Boolean = false,
+    val hasDhizukuAccess: Boolean = false,
+    val canLoadGsiPrivileged: Boolean = false,
+    val isDevOptEnabled: Boolean = false,
+    val preferredPrivilegedMode: PreferredPrivilegedMode = PreferredPrivilegedMode.ALL,
+    val uiStyle: UiStyle = UiStyle.EXPRESSIVE,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val useDynamicColor: Boolean = false,
+    val colorPaletteStyle: ColorPaletteStyle = ColorPaletteStyle.TONAL_SPOT,
+)
