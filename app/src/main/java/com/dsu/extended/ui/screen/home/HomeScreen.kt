@@ -69,7 +69,7 @@ fun Home(
 
     ApplicationScreen(
         modifier = Modifier.padding(horizontal = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(if (uiStyle == UiStyle.MIUIX) 8.dp else 10.dp),
+        verticalArrangement = Arrangement.spacedBy(if (uiStyle == UiStyle.MIUIX) 6.dp else 8.dp),
         topBar = {
             TopBar(
                 barTitle = stringResource(id = R.string.app_name),
@@ -80,7 +80,11 @@ fun Home(
             )
         },
         content = {
-            Box(modifier = Modifier.animateContentSize()) {
+            Box(
+                modifier = Modifier
+                    .padding(top = if (uiState.additionalCard == AdditionalCardState.NONE) 0.dp else 10.dp)
+                    .animateContentSize(),
+            ) {
                 when (uiState.additionalCard) {
                     AdditionalCardState.NO_DYNAMIC_PARTITIONS ->
                         UnsupportedCard(
@@ -91,10 +95,10 @@ fun Home(
                     AdditionalCardState.SETUP_STORAGE ->
                         SetupStorage { homeViewModel.takeUriPermission(it) }
 
-                    AdditionalCardState.UNAVAIABLE_STORAGE ->
+                    AdditionalCardState.UNAVAILABLE_STORAGE ->
                         StorageWarningCard(
                             minPercentageFreeStorage = homeViewModel.allocPercentageInt.toString(),
-                            onClick = { homeViewModel.overrideUnavaiableStorage() },
+                            onClick = { homeViewModel.overrideUnavailableStorage() },
                         )
 
                     AdditionalCardState.MISSING_READ_LOGS_PERMISSION ->

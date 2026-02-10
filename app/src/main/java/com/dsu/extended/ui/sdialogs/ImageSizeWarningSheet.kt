@@ -18,6 +18,7 @@ fun ImageSizeWarningSheet(
         text = stringResource(id = R.string.dialog_image_size_description),
         confirmText = stringResource(id = R.string.set_anyway),
         cancelText = stringResource(id = R.string.cancel),
+        confirmGlow = true,
         onClickConfirm = onClickConfirm,
         onClickCancel = onClickCancel,
     )

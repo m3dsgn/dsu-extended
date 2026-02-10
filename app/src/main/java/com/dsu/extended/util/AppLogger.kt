@@ -11,6 +11,22 @@ object AppLogger {
     private const val MAX_BUFFERED_LINES = 4000
     private val bufferedLogs = ArrayDeque<String>(MAX_BUFFERED_LINES)
     private val lock = Any()
+    @Volatile
+    private var watermarkPrinted = false
+    private const val WATERMARK_TAG = "DSUExtWatermark"
+    private val watermarkLines =
+        listOf(
+            "▓█████▄   ██████  █    ██    ▓█████ ▒██   ██▒▄▄▄█████▓▓█████  ███▄    █ ▓█████▄ ▓█████ ▓█████▄ ",
+            "▒██▀ ██▌▒██    ▒  ██  ▓██▒   ▓█   ▀ ▒▒ █ █ ▒░▓  ██▒ ▓▒▓█   ▀  ██ ▀█   █ ▒██▀ ██▌▓█   ▀ ▒██▀ ██▌",
+            "░██   █▌░ ▓██▄   ▓██  ▒██░   ▒███   ░░  █   ░▒ ▓██░ ▒░▒███   ▓██  ▀█ ██▒░██   █▌▒███   ░██   █▌",
+            "░▓█▄   ▌  ▒   ██▒▓▓█  ░██░   ▒▓█  ▄  ░ █ █ ▒ ░ ▓██▓ ░ ▒▓█  ▄ ▓██▒  ▐▌██▒░▓█▄   ▌▒▓█  ▄ ░▓█▄   ▌",
+            "░▒████▓ ▒██████▒▒▒▒█████▓    ░▒████▒▒██▒ ▒██▒  ▒██▒ ░ ░▒████▒▒██░   ▓██░░▒████▓ ░▒████▒░▒████▓ ",
+            " ▒▒▓  ▒ ▒ ▒▓▒ ▒ ░░▒▓▒ ▒ ▒    ░░ ▒░ ░▒▒ ░ ░▓ ░  ▒ ░░   ░░ ▒░ ░░ ▒░   ▒ ▒  ▒▒▓  ▒ ░░ ▒░ ░ ▒▒▓  ▒ ",
+            " ░ ▒  ▒ ░ ░▒  ░ ░░░▒░ ░ ░     ░ ░  ░░░   ░▒ ░    ░     ░ ░  ░░ ░░   ░ ▒░ ░ ▒  ▒  ░ ░  ░ ░ ▒  ▒ ",
+            " ░ ░  ░ ░  ░  ░   ░░░ ░ ░       ░    ░    ░    ░         ░      ░   ░ ░  ░ ░  ░    ░    ░ ░  ░ ",
+            "   ░          ░     ░           ░  ░ ░    ░              ░  ░         ░    ░       ░  ░   ░    ",
+            " ░                                                                       ░              ░      ",
+        )
 
     private fun buildMessage(message: String, details: Array<out Pair<String, Any?>>): String {
         val formatter = requireNotNull(timestampFormatter.get())
@@ -32,6 +48,22 @@ object AppLogger {
                 bufferedLogs.removeFirst()
             }
             bufferedLogs.addLast("[$priority][$tag] $message")
+        }
+    }
+
+    fun printWatermarkOnce() {
+        if (watermarkPrinted) {
+            return
+        }
+        synchronized(lock) {
+            if (watermarkPrinted) {
+                return
+            }
+            watermarkLines.forEach { line ->
+                appendBufferedLog("I", WATERMARK_TAG, line)
+                Log.i(WATERMARK_TAG, line)
+            }
+            watermarkPrinted = true
         }
     }
 

@@ -1,0 +1,83 @@
+#!/system/bin/sh
+
+PKG_NAME="com.dsu.extended"
+
+set_prop_value() {
+  key="$1"
+  value="$2"
+  if command -v resetprop >/dev/null 2>&1; then
+    resetprop -n "$key" "$value"
+  else
+    setprop "$key" "$value"
+  fi
+}
+
+resolve_uid() {
+  cmd package list packages -U "$PKG_NAME" 2>/dev/null | sed -n 's/.* uid:\([0-9][0-9]*\).*/\1/p' | head -n1
+}
+
+magisk_sql() {
+  sql="$1"
+  command -v magisk >/dev/null 2>&1 || return 1
+  magisk --sqlite "$sql" >/dev/null 2>&1
+}
+
+grant_magisk_root() {
+  uid="$1"
+  [ -n "$uid" ] || return 1
+  magisk_sql "INSERT OR REPLACE INTO policies (uid, policy, until, logging, notification) VALUES ($uid, 2, 0, 1, 0);" && return 0
+  magisk_sql "INSERT OR REPLACE INTO policies (uid, policy, logging, notification, until) VALUES ($uid, 2, 1, 0, 0);" && return 0
+  magisk_sql "INSERT OR REPLACE INTO policies (uid, policy, logging, notification) VALUES ($uid, 2, 1, 0);" && return 0
+  return 1
+}
+
+apply_dsu_flags() {
+  set_prop_value persist.sys.fflag.override.settings_dynamic_system true
+  set_prop_value persist.sys.fflag.override.settings_dynamic_system_uis true
+  settings put global dynamic_system_developer_mode 1 >/dev/null 2>&1
+}
+
+print_status() {
+  uid="$(resolve_uid)"
+  echo "package: $PKG_NAME"
+  echo "uid: ${uid:-not installed}"
+  echo "persist.sys.fflag.override.settings_dynamic_system=$(getprop persist.sys.fflag.override.settings_dynamic_system)"
+  echo "persist.sys.fflag.override.settings_dynamic_system_uis=$(getprop persist.sys.fflag.override.settings_dynamic_system_uis)"
+  echo "dynamic_system_developer_mode=$(settings get global dynamic_system_developer_mode 2>/dev/null)"
+}
+
+usage() {
+  cat <<EOF
+Usage: dsuext-helper <command>
+Commands:
+  status   Show current DSU helper state
+  prep     Apply DSU prerequisite properties/settings
+  grant    Try to auto-grant Magisk root policy for $PKG_NAME
+EOF
+}
+
+case "$1" in
+  status)
+    print_status
+    ;;
+  prep)
+    apply_dsu_flags
+    print_status
+    ;;
+  grant)
+    uid="$(resolve_uid)"
+    if [ -z "$uid" ]; then
+      echo "error: $PKG_NAME is not installed"
+      exit 1
+    fi
+    if grant_magisk_root "$uid"; then
+      echo "ok: Magisk root policy granted for uid $uid"
+    else
+      echo "error: failed to grant Magisk root policy"
+      exit 1
+    fi
+    ;;
+  *)
+    usage
+    ;;
+esac

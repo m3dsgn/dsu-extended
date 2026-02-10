@@ -313,12 +313,20 @@ fun DsuExtendedTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = Color.Transparent.toArgb()
+            val statusBarColor =
+                if (themeMode == ThemeMode.OLED) {
+                    Color(0xFF000000)
+                } else if (uiStyle == UiStyle.MIUIX) {
+                    colorScheme.surfaceContainer
+                } else {
+                    Color.Transparent
+                }
+            window.statusBarColor = statusBarColor.toArgb()
             window.navigationBarColor =
-                if (uiStyle == UiStyle.MIUIX) {
-                    Color.Transparent.toArgb()
-                } else if (themeMode == ThemeMode.OLED) {
+                if (themeMode == ThemeMode.OLED) {
                     Color(0xFF000000).toArgb()
+                } else if (uiStyle == UiStyle.MIUIX) {
+                    colorScheme.surfaceContainer.toArgb()
                 } else if (useDarkTheme) {
                     Color(0x70000000).toArgb()
                 } else {

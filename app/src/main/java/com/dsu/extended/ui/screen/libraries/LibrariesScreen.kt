@@ -1,6 +1,7 @@
 package com.dsu.extended.ui.screen.libraries
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -123,17 +124,28 @@ fun LibrariesScreen(
     }
 
     val appBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(appBarState)
+    val scrollBehavior =
+        if (uiStyle == UiStyle.MIUIX) {
+            null
+        } else {
+            TopAppBarDefaults.exitUntilCollapsedScrollBehavior(appBarState)
+        }
 
     ApplicationScreen(
         enableDefaultScrollBehavior = false,
         columnContent = false,
         modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .then(
+                if (scrollBehavior != null) {
+                    Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+                } else {
+                    Modifier
+                },
+            )
             .padding(
                 start = 12.dp,
                 end = 12.dp,
-                top = if (uiStyle == UiStyle.MIUIX) 0.dp else 10.dp,
+                top = if (uiStyle == UiStyle.MIUIX) 6.dp else 10.dp,
             ),
         topBar = {
             TopBar(
@@ -145,6 +157,7 @@ fun LibrariesScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 26.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             items(libraries.size) { index ->
@@ -174,7 +187,7 @@ fun LibrariesScreen(
                     )
                 }
             }
-            item { Spacer(modifier = Modifier.padding(26.dp)) }
+            item { Spacer(modifier = Modifier.padding(2.dp)) }
         }
     }
 }

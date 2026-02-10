@@ -73,9 +73,9 @@ fun AboutScreen(
 
     ApplicationScreen(
         modifier = Modifier.padding(
-            start = 10.dp,
-            end = 10.dp,
-            top = if (uiStyle == UiStyle.MIUIX) 0.dp else 10.dp,
+            start = 12.dp,
+            end = 12.dp,
+            top = if (uiStyle == UiStyle.MIUIX) 6.dp else 10.dp,
         ),
         topBar = {
             TopBar(

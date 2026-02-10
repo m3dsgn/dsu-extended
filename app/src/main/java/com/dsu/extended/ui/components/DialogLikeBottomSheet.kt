@@ -29,6 +29,7 @@ fun DialogLikeBottomSheet(
     text: String = "",
     confirmText: String = "",
     cancelText: String = "",
+    confirmGlow: Boolean = false,
     hideKeyboard: Boolean = true,
     onClickConfirm: () -> Unit = {},
     onClickCancel: () -> Unit = {},
@@ -69,6 +70,7 @@ fun DialogLikeBottomSheet(
             Spacer(modifier = Modifier.padding(4.dp))
             PrimaryButton(
                 text = confirmText,
+                glow = confirmGlow,
                 onClick = {
                     coroutineScope.launch {
                         it() /* Hide Sheet before confirming */

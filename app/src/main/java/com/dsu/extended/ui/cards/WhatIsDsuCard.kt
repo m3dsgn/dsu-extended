@@ -1,7 +1,8 @@
 package com.dsu.extended.ui.cards
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,14 +24,19 @@ fun DsuInfoCard(
         text = stringResource(id = R.string.what_is_dsu_description),
         justifyText = true,
     ) {
-        Row(modifier = Modifier.padding(top = 6.dp)) {
-            Spacer(modifier = Modifier.weight(1F))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
             SecondaryButton(
+                modifier = Modifier.weight(1f),
                 text = stringResource(id = R.string.view_docs),
                 onClick = onClickViewDocs,
             )
-            Spacer(modifier = Modifier.padding(start = 10.dp))
             SecondaryButton(
+                modifier = Modifier.weight(1f),
                 text = stringResource(id = R.string.learn_more),
                 onClick = onClickLearnMore,
             )

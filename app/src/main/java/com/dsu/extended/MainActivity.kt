@@ -429,6 +429,7 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppLogger.printWatermarkOnce()
         Shell.getShell {}
         WindowCompat.setDecorFitsSystemWindows(window, false)
         AppLogger.i(tag, "MainActivity created", "savedState" to (savedInstanceState != null))

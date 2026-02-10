@@ -5,12 +5,14 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -58,6 +60,8 @@ import com.dsu.extended.ui.theme.DSUTextStyles
 import com.dsu.extended.ui.theme.LocalUiStyle
 import com.dsu.extended.ui.theme.SemanticColors
 import com.dsu.extended.ui.theme.UiStyle
+import com.dsu.extended.ui.theme.MiuixFontFamily
+import com.dsu.extended.ui.theme.AppFontFamily
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -78,14 +82,21 @@ fun ProgressableCardContent(
     onClickAuxAction: (() -> Unit)? = null,
 ) {
     val uiStyle = LocalUiStyle.current
+    val safeProgress = progress.coerceIn(0f, 1f)
     val sizeAnimationSpec = spring<androidx.compose.ui.unit.IntSize>(
         dampingRatio = if (uiStyle == UiStyle.MIUIX) Spring.DampingRatioNoBouncy else Spring.DampingRatioLowBouncy,
         stiffness = if (uiStyle == UiStyle.MIUIX) Spring.StiffnessMedium else Spring.StiffnessMediumLow,
     )
-    val progressAnimationSpec = spring<Float>(
-        dampingRatio = if (uiStyle == UiStyle.MIUIX) Spring.DampingRatioNoBouncy else Spring.DampingRatioLowBouncy,
-        stiffness = if (uiStyle == UiStyle.MIUIX) Spring.StiffnessMedium else Spring.StiffnessMediumLow,
-    )
+    val progressAnimationSpec: AnimationSpec<Float> =
+        if (uiStyle == UiStyle.MIUIX) {
+            tween(durationMillis = 220, easing = FastOutSlowInEasing)
+        } else {
+            tween(durationMillis = 280, easing = FastOutSlowInEasing)
+        }
+    val progressTextStyle =
+        DSUTextStyles.progressText.copy(
+            fontFamily = if (uiStyle == UiStyle.MIUIX) MiuixFontFamily else AppFontFamily,
+        )
     val successIconScale by animateFloatAsState(
         targetValue = if (showSuccess) 1f else 0.78f,
         animationSpec = spring(
@@ -185,9 +196,9 @@ fun ProgressableCardContent(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
             ) {
                 // Progress percentage
-                if (!isIndeterminate && progress > 0) {
+                if (!isIndeterminate && safeProgress > 0f) {
                     val animatedProgress by animateFloatAsState(
-                        targetValue = progress,
+                        targetValue = safeProgress,
                         animationSpec = progressAnimationSpec,
                         label = "progress",
                     )
@@ -198,7 +209,7 @@ fun ProgressableCardContent(
                     ) {
                         Text(
                             text = "${(animatedProgress * 100).toInt()}%",
-                            style = DSUTextStyles.progressText,
+                            style = progressTextStyle,
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Spacer(modifier = Modifier.weight(1f))
@@ -222,14 +233,14 @@ fun ProgressableCardContent(
                 } else {
                     if (uiStyle == UiStyle.MIUIX) {
                         MiuixProgressBar(
-                            progress = progress,
+                            progress = safeProgress,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp),
                         )
                     } else {
                         ExpressiveProgressBar(
-                            progress = progress,
+                            progress = safeProgress,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp),

@@ -89,9 +89,9 @@ fun LogsScreen(
         modifier = Modifier.padding(
             start = 12.dp,
             end = 12.dp,
-            top = if (uiStyle == UiStyle.MIUIX) 0.dp else 10.dp,
+            top = if (uiStyle == UiStyle.MIUIX) 6.dp else 10.dp,
         ),
-        verticalArrangement = Arrangement.spacedBy(if (uiStyle == UiStyle.MIUIX) 8.dp else 10.dp),
+        verticalArrangement = Arrangement.spacedBy(if (uiStyle == UiStyle.MIUIX) 6.dp else 10.dp),
         topBar = {
             TopBar(
                 barTitle = stringResource(id = R.string.logs_title),

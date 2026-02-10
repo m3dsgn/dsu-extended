@@ -19,6 +19,10 @@ extensions.configure<ApplicationExtension>("android") {
     val versionCode: Int by rootProject.extra
     val versionName: String by rootProject.extra
     val packageName: String by rootProject.extra
+    val enableAbiSplits =
+        (project.findProperty("ENABLE_ABI_SPLITS") as? String)
+            ?.equals("true", ignoreCase = true)
+            ?: false
 
     namespace = packageName
     compileSdk = 36
@@ -81,6 +85,15 @@ extensions.configure<ApplicationExtension>("android") {
         }
     }
 
+    splits {
+        abi {
+            isEnable = enableAbiSplits
+            reset()
+            include("armeabi-v7a", "arm64-v8a")
+            isUniversalApk = false
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -136,6 +149,7 @@ dependencies {
     implementation("org.tukaani:xz:1.11")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("com.mikepenz:aboutlibraries-core:13.2.1")
+    implementation("dev.chrisbanes.haze:haze-android:1.7.1")
     implementation("dev.rikka.shizuku:api:13.1.5")
     implementation("dev.rikka.shizuku:provider:13.1.5")
     implementation("io.github.iamr0s:Dhizuku-API:2.5.4")

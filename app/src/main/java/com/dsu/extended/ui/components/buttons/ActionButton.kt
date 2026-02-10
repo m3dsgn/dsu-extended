@@ -1,12 +1,18 @@
 package com.dsu.extended.ui.components.buttons
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -15,11 +21,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dsu.extended.ui.theme.DSUTextStyles
+import com.dsu.extended.ui.theme.LocalUiStyle
+import com.dsu.extended.ui.theme.UiStyle
+import top.yukonga.miuix.kmp.basic.Button as MiuixButton
+import top.yukonga.miuix.kmp.basic.ButtonDefaults as MiuixButtonDefaults
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -35,13 +50,82 @@ fun ActionButton(
     isEnabled: Boolean = true,
     content: @Composable () -> Unit = {},
 ) {
+    val uiStyle = LocalUiStyle.current
     val resolvedTextColor = colorText ?: MaterialTheme.colorScheme.onSecondaryContainer
     val resolvedIconTint = iconTint ?: colorText ?: MaterialTheme.colorScheme.primary
+    val baseShape = RoundedCornerShape(18.dp)
+    val pressedShape = RoundedCornerShape(10.dp)
+
+    if (uiStyle == UiStyle.MIUIX) {
+        val miuixContainerColor =
+            if (textButton) {
+                Color.Transparent
+            } else {
+                colorButton ?: MiuixTheme.colorScheme.secondaryContainer
+            }
+        val miuixColors = MiuixButtonDefaults.buttonColors(
+            color = miuixContainerColor,
+            disabledColor = miuixContainerColor.copy(alpha = 0.45f),
+        )
+        val miuixTextColor =
+            colorText
+                ?: if (textButton) {
+                    MiuixTheme.colorScheme.primary
+                } else {
+                    MiuixTheme.colorScheme.onSecondaryContainer
+                }
+        val miuixIconColor = iconTint ?: miuixTextColor
+
+        MiuixButton(
+            modifier = modifier,
+            onClick = onClick,
+            enabled = isEnabled,
+            cornerRadius = if (textButton) 14.dp else 16.dp,
+            minHeight = if (textButton) 40.dp else 46.dp,
+            colors = miuixColors,
+        ) {
+            Row(horizontalArrangement = Arrangement.Center) {
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = miuixIconColor,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text(
+                    text = text,
+                    style = MiuixTheme.textStyles.button,
+                    color = miuixTextColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        return
+    }
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium,
+        ),
+        label = "actionButtonScale",
+    )
+
     if (textButton) {
         TextButton(
             onClick = onClick,
-            modifier = modifier,
-            shapes = ButtonDefaults.shapes(),
+            modifier = modifier.scale(scale),
+            interactionSource = interactionSource,
+            shapes = ButtonDefaults.shapes(
+                shape = baseShape,
+                pressedShape = pressedShape,
+            ),
             colors =
                 ButtonDefaults.textButtonColors(
                     contentColor = colorText ?: MaterialTheme.colorScheme.primary,
@@ -62,17 +146,24 @@ fun ActionButton(
                     text = text,
                     style = DSUTextStyles.buttonText,
                     color = colorText ?: MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
     } else {
         FilledTonalButton(
             modifier = modifier
-                .height(46.dp),
+                .defaultMinSize(minHeight = 46.dp)
+                .scale(scale),
             onClick = onClick,
             enabled = isEnabled,
-            shapes = ButtonDefaults.shapes(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            interactionSource = interactionSource,
+            shapes = ButtonDefaults.shapes(
+                shape = baseShape,
+                pressedShape = pressedShape,
+            ),
+            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 9.dp),
             colors = if (colorButton != null) {
                 ButtonDefaults.filledTonalButtonColors(
                     containerColor = colorButton,
@@ -95,6 +186,8 @@ fun ActionButton(
                 text = text,
                 style = DSUTextStyles.buttonText,
                 color = resolvedTextColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             content()
         }

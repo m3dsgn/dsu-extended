@@ -1,7 +1,7 @@
 {
   "identifier":"dsu_extended",
-  "versionCode": 11,
-  "versionName": "0.5-beta",
+  "versionCode": 12,
+  "versionName": "0.7-beta",
   "apkUrl": "https://github.com/m3dsgn/dsu-extended/releases/latest/download/app-release.apk",
   "changelogUrl": "https://github.com/m3dsgn/dsu-extended/releases/latest"
 }

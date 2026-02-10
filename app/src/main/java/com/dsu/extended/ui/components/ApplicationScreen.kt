@@ -24,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import com.dsu.extended.ui.theme.LocalUiStyle
+import com.dsu.extended.ui.theme.UiStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,14 +39,16 @@ fun ApplicationScreen(
     outsideContent: @Composable (PaddingValues) -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
+    val uiStyle = LocalUiStyle.current
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         flingAnimationSpec = decayAnimationSpec,
         state = rememberTopAppBarState(),
     )
 
+    val useTopBarNestedScroll = enableDefaultScrollBehavior && uiStyle != UiStyle.MIUIX
     val scrollBehaviorModifier =
-        if (enableDefaultScrollBehavior) Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) else Modifier
+        if (useTopBarNestedScroll) Modifier.nestedScroll(scrollBehavior.nestedScrollConnection) else Modifier
 
     val insets = WindowInsets
         .systemBars
@@ -63,6 +67,7 @@ fun ApplicationScreen(
                 if (columnContent) {
                     Column(
                         modifier = modifier
+                            .fillMaxSize()
                             .padding(top = innerPadding.calculateTopPadding())
                             .then(scrollModifier),
                         verticalArrangement = verticalArrangement,

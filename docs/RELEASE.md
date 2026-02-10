@@ -1,4 +1,4 @@
-# Release Guide (`0.5-beta`)
+# Release Guide (`0.7-beta`)
 
 This guide is for publishing Dsu Extended on GitHub with a working in-app updater.
 
@@ -69,10 +69,10 @@ Use the lowercase hex digest (without spaces) for `AUTHOR_SIGN_DIGEST`.
 
 ## 5. Version and Metadata
 
-For `0.5-beta`, ensure:
+For `0.7-beta`, ensure:
 - `build.gradle.kts`:
-  - `versionCode = 11`
-  - `versionName = "0.5-beta"`
+  - `versionCode = 12`
+  - `versionName = "0.7-beta"`
 - `other/updater.json`:
   - same versionCode/versionName
   - `apkUrl` points to GitHub release asset
@@ -108,19 +108,19 @@ Expected unsigned APK:
 
 ```bash
 git add .
-git commit -m "release: 0.5-beta"
-git tag -a v0.5-beta -m "0.5-beta"
+git commit -m "release: 0.7-beta"
+git tag -a v0.7-beta -m "0.7-beta"
 git push origin main
-git push origin v0.5-beta
+git push origin v0.7-beta
 ```
 
 Create release and upload assets:
 ```bash
-gh release create v0.5-beta \
+gh release create v0.7-beta \
   app/build/outputs/apk/release/app-release.apk \
   app/build/outputs/apk/release/app-release-unsigned.apk \
-  --title "0.5-beta" \
-  --notes "Release 0.5-beta"
+  --title "0.7-beta" \
+  --notes "Release 0.7-beta"
 ```
 
 ## 8. What to Upload

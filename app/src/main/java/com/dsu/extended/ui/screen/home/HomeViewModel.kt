@@ -56,7 +56,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     var checkDynamicPartitions = true
-    var checkUnavaiableStorage = true
+    var checkUnavailableStorage = true
     var checkReadLogsPermission = true
     var disabledStorageCheck = false
 
@@ -128,7 +128,7 @@ class HomeViewModel @Inject constructor(
             tag,
             "Running initial checks",
             "checkDynamicPartitions" to checkDynamicPartitions,
-            "checkUnavaiableStorage" to checkUnavaiableStorage,
+            "checkUnavailableStorage" to checkUnavailableStorage,
             "hasAvailableStorage" to hasAvailableStorage,
             "allocPercentage" to allocPercentage,
             "maximumAllowedForAllocation" to maximumAllowedForAllocation,
@@ -140,7 +140,7 @@ class HomeViewModel @Inject constructor(
             return
         }
 
-        if (checkUnavaiableStorage && !hasAvailableStorage) {
+        if (checkUnavailableStorage && !hasAvailableStorage) {
             AppLogger.w(
                 tag,
                 "Initial check failed: unavailable storage",
@@ -148,7 +148,7 @@ class HomeViewModel @Inject constructor(
                 "allocPercentage" to allocPercentage,
                 "maximumAllowedForAllocation" to maximumAllowedForAllocation,
             )
-            updateAdditionalCardState(AdditionalCardState.UNAVAIABLE_STORAGE)
+            updateAdditionalCardState(AdditionalCardState.UNAVAILABLE_STORAGE)
             return
         }
 
@@ -198,9 +198,9 @@ class HomeViewModel @Inject constructor(
         initialChecks()
     }
 
-    fun overrideUnavaiableStorage() {
-        checkUnavaiableStorage = false
-        AppLogger.w(tag, "Storage availability check overridden", "checkUnavaiableStorage" to checkUnavaiableStorage)
+    fun overrideUnavailableStorage() {
+        checkUnavailableStorage = false
+        AppLogger.w(tag, "Storage availability check overridden", "checkUnavailableStorage" to checkUnavailableStorage)
         initialChecks()
     }
 
@@ -355,7 +355,7 @@ class HomeViewModel @Inject constructor(
             "Package: ${BuildConfig.APPLICATION_ID}\n" +
             "Version: ${BuildConfig.VERSION_NAME} - ${BuildConfig.VERSION_CODE} (${BuildConfig.BUILD_TYPE})\n" +
             "checkDynamicPartitions: $checkDynamicPartitions\n" +
-            "checkUnavaiableStorage: $checkUnavaiableStorage\n" +
+            "checkUnavailableStorage: $checkUnavailableStorage\n" +
             "checkReadLogsPermission: $checkReadLogsPermission\n" +
             "allocPercentage: $allocPercentage\n" +
             "hasAvailableStorage: $hasAvailableStorage\n" +
@@ -623,7 +623,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onPreparationProgressUpdate(progress: Float) {
-        updateInstallationCard { it.copy(installationProgress = progress) }
+        val safeProgress = progress.coerceIn(0f, 1f)
+        updateInstallationCard { it.copy(installationProgress = safeProgress) }
         val currentCardState = uiState.value.installationCard
         val progressStep =
             if (currentCardState.installationStep == InstallationStep.NOT_INSTALLING) {
@@ -633,7 +634,7 @@ class HomeViewModel @Inject constructor(
             }
         liveUpdateNotifier.showProgress(
             step = progressStep,
-            progress = progress,
+            progress = safeProgress,
             partition = currentCardState.currentPartitionText,
         )
     }
@@ -655,9 +656,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onInstallationProgressUpdate(progress: Float, partition: String) {
-        updateInstallationCard {
-            it.copy(currentPartitionText = partition, installationProgress = progress)
-        }
+        val previousState = uiState.value.installationCard
         val currentStep = uiState.value.installationCard.installationStep
         val progressStep =
             when (currentStep) {
@@ -669,9 +668,23 @@ class HomeViewModel @Inject constructor(
 
                 else -> InstallationStep.INSTALLING
             }
+        val safeProgress = progress.coerceIn(0f, 1f)
+        val shouldKeepPreviousProgress =
+            previousState.installationStep == progressStep &&
+                previousState.currentPartitionText.equals(partition, ignoreCase = true) &&
+                safeProgress < previousState.installationProgress
+        val normalizedProgress =
+            if (shouldKeepPreviousProgress) {
+                previousState.installationProgress
+            } else {
+                safeProgress
+            }
+        updateInstallationCard {
+            it.copy(currentPartitionText = partition, installationProgress = normalizedProgress)
+        }
         liveUpdateNotifier.showProgress(
             step = progressStep,
-            progress = progress,
+            progress = normalizedProgress,
             partition = partition,
         )
     }

@@ -6,7 +6,7 @@ tasks.register<Zip>("assembleMagiskModule") {
     val id = "dsu_extended"
     val name = "Dsu Extended"
     val author = "VegaBobo"
-    val description = "System mode for Dsu Extended"
+    val description = "System mode + DSU helper (flags, gsid patch, root preflight)"
     val updateJson = "https://raw.githubusercontent.com/m3dsgn/dsu-extended/main/other/module_updater/updater_module_gsid.json"
 
     val versionCode: Int by rootProject.extra

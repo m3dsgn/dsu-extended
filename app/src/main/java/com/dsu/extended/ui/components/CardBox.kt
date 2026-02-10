@@ -168,7 +168,9 @@ fun CardBox(
             if (cardTitle.isNotEmpty()) {
                 if (addToggle) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = if (uiStyle == UiStyle.MIUIX) 10.dp else 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         CardTitle(
@@ -221,7 +223,7 @@ fun CardBox(
                 } else {
                     CardTitle(
                         cardTitle = cardTitle,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+                        modifier = Modifier.padding(top = 2.dp, bottom = 10.dp),
                         color = if (isGradient) Color.White else MaterialTheme.colorScheme.onSurface,
                     )
                 }

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.dsu.extended.R
 import com.dsu.extended.ui.components.SimpleCard
-import com.dsu.extended.ui.components.buttons.SecondaryButton
+import com.dsu.extended.ui.components.buttons.PrimaryButton
 
 @Composable
 fun UnlockedBootloaderCard(
@@ -22,7 +22,7 @@ fun UnlockedBootloaderCard(
     ) {
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
             Row {
-                SecondaryButton(
+                PrimaryButton(
                     text = stringResource(id = R.string.proceed),
                     onClick = onClickClose,
                 )
