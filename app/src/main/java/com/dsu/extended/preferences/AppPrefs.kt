@@ -12,6 +12,7 @@ object AppPrefs {
     const val FULL_LOGCAT_LOGGING = "full_logcat_logging"
     const val OPERATION_MODE_OVERRIDE = "operation_mode_override"
     const val UI_STYLE = "ui_style"
+    const val APP_FONT_PRESET = "app_font_preset"
     const val THEME_MODE = "theme_mode"
     const val USE_DYNAMIC_COLOR = "use_dynamic_color"
     const val MATERIAL_COLOR_STYLE = "material_color_style"

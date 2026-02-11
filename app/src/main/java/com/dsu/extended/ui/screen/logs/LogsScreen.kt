@@ -98,6 +98,7 @@ fun LogsScreen(
                 compactTitle = true,
                 icon = Icons.Rounded.Settings,
                 scrollBehavior = it,
+                onClickBackButton = { navigate(Destinations.Up) },
                 onClickIcon = { navigate(Destinations.Preferences) },
             )
         },

@@ -225,6 +225,7 @@ fun DsuExtendedTheme(
     dynamicColor: Boolean = false,
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     colorPaletteStyle: ColorPaletteStyle = ColorPaletteStyle.TONAL_SPOT,
+    appFontPreset: AppFontPreset = AppFontPreset.SYSTEM_DEFAULT,
     uiStyle: UiStyle = UiStyle.EXPRESSIVE,
     animateColors: Boolean = true,
     content: @Composable () -> Unit,
@@ -249,12 +250,19 @@ fun DsuExtendedTheme(
         } else {
             MotionScheme.expressive()
         }
+    val selectedFontFamily =
+        if (appFontPreset == AppFontPreset.SYSTEM_DEFAULT && uiStyle == UiStyle.MIUIX) {
+            MiuixFontFamily
+        } else {
+            resolveAppFontFamily(appFontPreset)
+        }
     val typography =
         if (uiStyle == UiStyle.MIUIX) {
-            MiuixTypography
+            createMiuixTypography(selectedFontFamily)
         } else {
-            Typography
+            createExpressiveTypography(selectedFontFamily)
         }
+    val dsuTextStyles = remember(selectedFontFamily) { createDsuTextStyles(selectedFontFamily) }
     val shapes =
         if (uiStyle == UiStyle.MIUIX) {
             MiuixShapes
@@ -287,7 +295,6 @@ fun DsuExtendedTheme(
             effectivePaletteStyle == ColorPaletteStyle.TONAL_SPOT &&
             dynamicSystemColorScheme != null
         ) {
-            // Tonal Spot in dynamic mode should match the real system Material You palette.
             dynamicSystemColorScheme
         } else {
             materialColorScheme(
@@ -343,7 +350,10 @@ fun DsuExtendedTheme(
 
     @Composable
     fun ApplyThemeContent() {
-        CompositionLocalProvider(LocalUiStyle provides uiStyle) {
+        CompositionLocalProvider(
+            LocalUiStyle provides uiStyle,
+            LocalDsuTextStyles provides dsuTextStyles,
+        ) {
             MaterialExpressiveTheme(
                 colorScheme = colorScheme,
                 motionScheme = motionScheme,

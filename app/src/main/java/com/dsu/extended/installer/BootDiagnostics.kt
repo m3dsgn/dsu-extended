@@ -275,7 +275,7 @@ object BootDiagnostics {
             errorAnalysis.errorType.contains("Partition", ignoreCase = true) -> {
                 suggestions.add("📦 Ensure your device has Dynamic Partitions support")
                 suggestions.add("💾 Free up more storage space (DSU requires significant free space)")
-                suggestions.add("🔧 Use a custom gsid build that matches your Android branch (A15/A16 patches are in magisk-module/aosp_patches)")
+                suggestions.add("🔧 Use a custom gsid build that matches your Android branch")
             }
 
             errorAnalysis.errorType.contains("Compatibility", ignoreCase = true) -> {
@@ -286,7 +286,7 @@ object BootDiagnostics {
 
             errorAnalysis.errorType.contains("SELinux", ignoreCase = true) -> {
                 suggestions.add("🛡️ Try running: setenforce 0 (requires root)")
-                suggestions.add("🔧 Install the Magisk module with sepolicy fixes")
+                suggestions.add("🔧 Install a Magisk module with sepolicy fixes")
                 suggestions.add("📦 Use a GSI with relaxed SELinux policies")
             }
 

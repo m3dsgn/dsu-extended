@@ -305,7 +305,7 @@ fun InstallationCardStep(
                 textSecondButton = stringResource(id = R.string.mreturn),
                 onClickSecondButton = onClickClear,
                 showError = true,
-                suggestion = "Use a patched gsid build for your Android version (see magisk-module/aosp_patches)",
+                suggestion = "Use a patched gsid build for your Android version",
             )
         InstallationStep.ERROR_GSI_INCOMPATIBLE ->
             ProgressableCardContent(

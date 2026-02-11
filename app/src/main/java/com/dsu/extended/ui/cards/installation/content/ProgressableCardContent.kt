@@ -62,6 +62,7 @@ import com.dsu.extended.ui.theme.SemanticColors
 import com.dsu.extended.ui.theme.UiStyle
 import com.dsu.extended.ui.theme.MiuixFontFamily
 import com.dsu.extended.ui.theme.AppFontFamily
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -97,6 +98,18 @@ fun ProgressableCardContent(
         DSUTextStyles.progressText.copy(
             fontFamily = if (uiStyle == UiStyle.MIUIX) MiuixFontFamily else AppFontFamily,
         )
+    val progressColor =
+        if (uiStyle == UiStyle.MIUIX) {
+            MiuixTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.primary
+        }
+    val progressTrackColor =
+        if (uiStyle == UiStyle.MIUIX) {
+            MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f)
+        } else {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+        }
     val successIconScale by animateFloatAsState(
         targetValue = if (showSuccess) 1f else 0.78f,
         animationSpec = spring(
@@ -196,7 +209,7 @@ fun ProgressableCardContent(
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
             ) {
                 // Progress percentage
-                if (!isIndeterminate && safeProgress > 0f) {
+                if (!isIndeterminate) {
                     val animatedProgress by animateFloatAsState(
                         targetValue = safeProgress,
                         animationSpec = progressAnimationSpec,
@@ -210,7 +223,7 @@ fun ProgressableCardContent(
                         Text(
                             text = "${(animatedProgress * 100).toInt()}%",
                             style = progressTextStyle,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = progressColor,
                         )
                         Spacer(modifier = Modifier.weight(1f))
                     }
@@ -222,12 +235,16 @@ fun ProgressableCardContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp),
+                            progressColor = progressColor,
+                            trackColor = progressTrackColor,
                         )
                     } else {
                         ExpressiveIndeterminateLoadingBar(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp),
+                            progressColor = progressColor,
+                            trackColor = progressTrackColor,
                         )
                     }
                 } else {
@@ -237,6 +254,8 @@ fun ProgressableCardContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp),
+                            progressColor = progressColor,
+                            trackColor = progressTrackColor,
                         )
                     } else {
                         ExpressiveProgressBar(
@@ -244,6 +263,8 @@ fun ProgressableCardContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp),
+                            progressColor = progressColor,
+                            trackColor = progressTrackColor,
                         )
                     }
                 }

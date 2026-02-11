@@ -9,8 +9,8 @@ plugins {
     id("org.jmailen.kotlinter") version "5.4.0" apply false
 }
 
-val versionCode by extra { 12 }
-val versionName by extra { "0.7-beta" }
+val versionCode by extra { 13 }
+val versionName by extra { "0.8-beta" }
 val packageName by extra { "com.dsu.extended" }
 
 tasks.register<Delete>("clean") {

@@ -1,6 +1,7 @@
 package com.dsu.extended.ui.screen.settings
 
 import com.dsu.extended.preferences.AppPrefs
+import com.dsu.extended.ui.theme.AppFontPreset
 import com.dsu.extended.ui.theme.ColorPaletteStyle
 import com.dsu.extended.ui.theme.ThemeMode
 import com.dsu.extended.ui.theme.UiStyle
@@ -14,6 +15,7 @@ enum class DialogSheetState {
     OPERATION_MODE_SELECTOR,
     THEME_MODE_SELECTOR,
     COLOR_STYLE_SELECTOR,
+    FONT_SELECTOR,
 }
 
 data class SettingsUiState(
@@ -33,6 +35,7 @@ data class SettingsUiState(
     val isDevOptEnabled: Boolean = false,
     val preferredPrivilegedMode: PreferredPrivilegedMode = PreferredPrivilegedMode.ALL,
     val uiStyle: UiStyle = UiStyle.EXPRESSIVE,
+    val appFontPreset: AppFontPreset = AppFontPreset.SYSTEM_DEFAULT,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val useDynamicColor: Boolean = false,
     val colorPaletteStyle: ColorPaletteStyle = ColorPaletteStyle.TONAL_SPOT,

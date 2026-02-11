@@ -97,128 +97,6 @@ object DSUAnimations {
         )
     }
 
-    /**
-     * Card exit animation - fade + scale down
-     */
-    fun cardExitAnimation(): ExitTransition {
-        return fadeOut(
-            animationSpec = tween(
-                durationMillis = DURATION_SHORT,
-                easing = FastOutSlowInEasing,
-            ),
-        ) + scaleOut(
-            animationSpec = tween(
-                durationMillis = DURATION_SHORT,
-                easing = FastOutSlowInEasing,
-            ),
-            targetScale = 0.95f,
-        )
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // Navigation Animations
-    // ═══════════════════════════════════════════════════════════════
-
-    /**
-     * Screen enter animation - slide from right + fade
-     */
-    val screenEnterAnimation: EnterTransition = slideInHorizontally(
-        animationSpec = tween(
-            durationMillis = DURATION_MEDIUM,
-            easing = FastOutSlowInEasing,
-        ),
-        initialOffsetX = { it / 4 },
-    ) + fadeIn(
-        animationSpec = tween(
-            durationMillis = DURATION_MEDIUM,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
-    /**
-     * Screen exit animation - slide to left + fade
-     */
-    val screenExitAnimation: ExitTransition = slideOutHorizontally(
-        animationSpec = tween(
-            durationMillis = DURATION_MEDIUM,
-            easing = FastOutSlowInEasing,
-        ),
-        targetOffsetX = { -it / 4 },
-    ) + fadeOut(
-        animationSpec = tween(
-            durationMillis = DURATION_SHORT,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
-    /**
-     * Screen pop enter animation - slide from left
-     */
-    val screenPopEnterAnimation: EnterTransition = slideInHorizontally(
-        animationSpec = tween(
-            durationMillis = DURATION_MEDIUM,
-            easing = FastOutSlowInEasing,
-        ),
-        initialOffsetX = { -it / 4 },
-    ) + fadeIn(
-        animationSpec = tween(
-            durationMillis = DURATION_MEDIUM,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
-    /**
-     * Screen pop exit animation - slide to right
-     */
-    val screenPopExitAnimation: ExitTransition = slideOutHorizontally(
-        animationSpec = tween(
-            durationMillis = DURATION_MEDIUM,
-            easing = FastOutSlowInEasing,
-        ),
-        targetOffsetX = { it / 4 },
-    ) + fadeOut(
-        animationSpec = tween(
-            durationMillis = DURATION_SHORT,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
-    // ═══════════════════════════════════════════════════════════════
-    // Bottom Sheet Animations
-    // ═══════════════════════════════════════════════════════════════
-
-    /**
-     * Bottom sheet enter animation - slide up + fade
-     */
-    val bottomSheetEnterAnimation: EnterTransition = slideInVertically(
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessMedium,
-        ),
-        initialOffsetY = { it },
-    ) + fadeIn(
-        animationSpec = tween(
-            durationMillis = DURATION_SHORT,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
-    /**
-     * Bottom sheet exit animation - slide down + fade
-     */
-    val bottomSheetExitAnimation: ExitTransition = slideOutVertically(
-        animationSpec = tween(
-            durationMillis = DURATION_MEDIUM,
-            easing = FastOutSlowInEasing,
-        ),
-        targetOffsetY = { it },
-    ) + fadeOut(
-        animationSpec = tween(
-            durationMillis = DURATION_SHORT,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
     // ═══════════════════════════════════════════════════════════════
     // Content Transitions
     // ═══════════════════════════════════════════════════════════════
@@ -250,103 +128,28 @@ object DSUAnimations {
         targetScale = 0.95f,
     )
 
-    // ═══════════════════════════════════════════════════════════════
-    // Button Animations
-    // ═══════════════════════════════════════════════════════════════
-
     /**
-     * Button press scale animation spec
+     * Screen transitions
      */
-    val buttonPressSpec = spring<Float>(
-        dampingRatio = Spring.DampingRatioMediumBouncy,
-        stiffness = Spring.StiffnessHigh,
-    )
+    val screenEnterAnimation: EnterTransition = slideInHorizontally(
+        animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing),
+        initialOffsetX = { it / 3 }
+    ) + fadeIn(animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing))
 
-    /**
-     * Button release scale animation spec
-     */
-    val buttonReleaseSpec = spring<Float>(
-        dampingRatio = Spring.DampingRatioLowBouncy,
-        stiffness = Spring.StiffnessMedium,
-    )
+    val screenExitAnimation: ExitTransition = slideOutHorizontally(
+        animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing),
+        targetOffsetX = { -it / 3 }
+    ) + fadeOut(animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing))
 
-    // ═══════════════════════════════════════════════════════════════
-    // Progress Animations
-    // ═══════════════════════════════════════════════════════════════
+    val screenPopEnterAnimation: EnterTransition = slideInHorizontally(
+        animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing),
+        initialOffsetX = { -it / 3 }
+    ) + fadeIn(animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing))
 
-    /**
-     * Progress bar animation spec
-     */
-    val progressSpec = tween<Float>(
-        durationMillis = DURATION_MEDIUM,
-        easing = FastOutSlowInEasing,
-    )
-
-    /**
-     * Indeterminate progress animation duration
-     */
-    const val INDETERMINATE_DURATION = 1200
-
-    // ═══════════════════════════════════════════════════════════════
-    // FAB Animations
-    // ═══════════════════════════════════════════════════════════════
-
-    /**
-     * FAB enter animation - scale + fade
-     */
-    val fabEnterAnimation: EnterTransition = scaleIn(
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium,
-        ),
-        initialScale = 0f,
-    ) + fadeIn(
-        animationSpec = tween(
-            durationMillis = DURATION_SHORT,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
-    /**
-     * FAB exit animation - scale + fade
-     */
-    val fabExitAnimation: ExitTransition = scaleOut(
-        animationSpec = tween(
-            durationMillis = DURATION_SHORT,
-            easing = FastOutSlowInEasing,
-        ),
-        targetScale = 0f,
-    ) + fadeOut(
-        animationSpec = tween(
-            durationMillis = DURATION_SHORT,
-            easing = FastOutSlowInEasing,
-        ),
-    )
-
-    // ═══════════════════════════════════════════════════════════════
-    // List Item Animations
-    // ═══════════════════════════════════════════════════════════════
-
-    /**
-     * Creates staggered enter animation for list items
-     */
-    fun listItemEnterAnimation(index: Int): EnterTransition {
-        val delay = (index * 30).coerceAtMost(300)
-        return fadeIn(
-            animationSpec = tween(
-                durationMillis = DURATION_MEDIUM,
-                delayMillis = delay,
-                easing = FastOutSlowInEasing,
-            ),
-        ) + slideInVertically(
-            animationSpec = tween(
-                durationMillis = DURATION_MEDIUM,
-                delayMillis = delay,
-                easing = FastOutSlowInEasing,
-            ),
-            initialOffsetY = { it / 5 },
-        )
-    }
+    val screenPopExitAnimation: ExitTransition = slideOutHorizontally(
+        animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing),
+        targetOffsetX = { it / 3 }
+    ) + fadeOut(animationSpec = tween(durationMillis = DURATION_MEDIUM, easing = FastOutSlowInEasing))
 }
 
 /**

@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import com.dsu.extended.core.BaseViewModel
 import com.dsu.extended.model.Session
 import com.dsu.extended.preferences.AppPrefs
+import com.dsu.extended.ui.theme.AppFontPreset
 import com.dsu.extended.ui.theme.ColorPaletteStyle
 import com.dsu.extended.ui.theme.ThemeMode
 import com.dsu.extended.ui.theme.UiStyle
@@ -48,6 +49,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val preferredMode = PreferredPrivilegedMode.fromPreference(readStringPref(AppPrefs.OPERATION_MODE_OVERRIDE))
             val uiStyle = UiStyle.fromPreference(readStringPref(AppPrefs.UI_STYLE))
+            val savedAppFontPreset = AppFontPreset.fromPreference(readStringPref(AppPrefs.APP_FONT_PRESET))
+            val appFontPreset =
+                if (uiStyle == UiStyle.MIUIX && savedAppFontPreset == AppFontPreset.SYSTEM_DEFAULT) {
+                    updateStringPref(AppPrefs.APP_FONT_PRESET, AppFontPreset.MANROPE.value)
+                    AppFontPreset.MANROPE
+                } else {
+                    savedAppFontPreset
+                }
             val themeMode = ThemeMode.fromPreference(readStringPref(AppPrefs.THEME_MODE))
             val colorStyle = ColorPaletteStyle.fromPreference(readStringPref(AppPrefs.MATERIAL_COLOR_STYLE))
             val dynamicColor = DataStoreUtils.readBoolPref(dataStore, AppPrefs.USE_DYNAMIC_COLOR, false)
@@ -72,6 +81,7 @@ class SettingsViewModel @Inject constructor(
                     canLoadGsiPrivileged = canLoadGsiPrivileged,
                     preferredPrivilegedMode = preferredMode,
                     uiStyle = uiStyle,
+                    appFontPreset = appFontPreset,
                     themeMode = themeMode,
                     useDynamicColor = normalizedDynamicColor,
                     colorPaletteStyle = normalizedColorStyle,
@@ -157,12 +167,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             updateStringPref(AppPrefs.UI_STYLE, style.value)
             if (style == UiStyle.MIUIX) {
-                // Keep MIUIX on stock palette and disable dynamic Material coloring.
                 updateBoolPref(AppPrefs.USE_DYNAMIC_COLOR, false)
                 updateStringPref(AppPrefs.MATERIAL_COLOR_STYLE, ColorPaletteStyle.TONAL_SPOT.value)
+                updateStringPref(AppPrefs.APP_FONT_PRESET, AppFontPreset.MANROPE.value)
                 _uiState.update {
                     it.copy(
                         uiStyle = style,
+                        appFontPreset = AppFontPreset.MANROPE,
                         useDynamicColor = false,
                         colorPaletteStyle = ColorPaletteStyle.TONAL_SPOT,
                     )
@@ -179,6 +190,14 @@ class SettingsViewModel @Inject constructor(
             updateStringPref(AppPrefs.THEME_MODE, mode.value)
             _uiState.update { it.copy(themeMode = mode) }
             AppLogger.i(tag, "Theme mode updated", "themeMode" to mode)
+        }
+    }
+
+    fun setAppFontPreset(preset: AppFontPreset) {
+        viewModelScope.launch {
+            updateStringPref(AppPrefs.APP_FONT_PRESET, preset.value)
+            _uiState.update { it.copy(appFontPreset = preset) }
+            AppLogger.i(tag, "App font preset updated", "preset" to preset)
         }
     }
 

@@ -105,10 +105,20 @@ class DSUInstaller(
     }
 
     private fun publishProgress(bytesRead: Long, totalBytes: Long, partition: String) {
-        var progress = 0F
-        if (totalBytes != 0L && bytesRead != 0L) {
-            progress = (bytesRead.toFloat() / totalBytes.toFloat())
-        }
+        val safeBytesRead = bytesRead.coerceAtLeast(0L)
+        val fallbackTotal = runCatching { installationProgress.total_bytes }.getOrDefault(0L)
+        val safeTotal =
+            when {
+                totalBytes > 0L -> totalBytes
+                fallbackTotal > 0L -> fallbackTotal
+                else -> 0L
+            }
+        val progress =
+            if (safeTotal > 0L && safeBytesRead > 0L) {
+                (safeBytesRead.toFloat() / safeTotal.toFloat()).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
         onInstallationProgressUpdate(progress, partition)
     }
 
@@ -117,14 +127,22 @@ class DSUInstaller(
         partitionSize: Long,
         readOnly: Boolean = false,
     ) {
+        onCreatePartition(partition)
         val job = Job()
         CoroutineScope(Dispatchers.IO + job).launch {
-            createNewPartition(partition, partitionSize, readOnly)
+            if (!createNewPartition(partition, partitionSize, readOnly)) {
+                job.cancel()
+                return@launch
+            }
             job.complete()
         }
         publishProgress(0L, partitionSize, partition)
         var prevInstalledSize = 0L
         while (job.isActive) {
+            if (installationJob.isCancelled) {
+                job.cancel()
+                return
+            }
             val installedSize = installationProgress.bytes_processed
             if (installedSize > prevInstalledSize + Constants.MIN_PROGRESS_TO_PUBLISH) {
                 prevInstalledSize = installedSize
@@ -162,13 +180,19 @@ class DSUInstaller(
         )
         val partitionSize = if (sis.unsparseSize != -1L) sis.unsparseSize else uncompressedSize
         onCreatePartition(partition)
-        createNewPartition(partition, partitionSize, readOnly)
+        if (!createNewPartition(partition, partitionSize, readOnly)) {
+            return
+        }
         onInstallationStepUpdate(InstallationStep.INSTALLING_ROOTED)
         SharedMemory.create("dsu_buffer_$partition", Constants.SHARED_MEM_SIZE)
             .use { sharedMemory ->
                 MappedMemoryBuffer(sharedMemory.mapReadWrite()).use { mappedBuffer ->
                     val fdDup = getFdDup(sharedMemory)
-                    setAshmem(fdDup, sharedMemory.size.toLong())
+                    if (!setAshmem(fdDup, sharedMemory.size.toLong())) {
+                        onInstallationError(InstallationStep.ERROR, "Failed to map installation ashmem")
+                        installationJob.cancel()
+                        return
+                    }
                     publishProgress(0L, partitionSize, partition)
                     var installedSize: Long = 0
                     val readBuffer = ByteArray(sharedMemory.size)
@@ -182,7 +206,11 @@ class DSUInstaller(
                         }
                         buffer!!.position(0)
                         buffer.put(readBuffer, 0, numBytesRead)
-                        submitFromAshmem(numBytesRead.toLong())
+                        if (!submitFromAshmem(numBytesRead.toLong())) {
+                            onInstallationError(InstallationStep.ERROR, "Failed to submit partition chunk")
+                            installationJob.cancel()
+                            return
+                        }
                         installedSize += numBytesRead.toLong()
                         publishProgress(installedSize, partitionSize, partition)
                     }
@@ -240,8 +268,14 @@ class DSUInstaller(
             return
         }
         forceStopDSU()
-        startInstallation(Constants.DEFAULT_SLOT)
+        if (!startInstallation(Constants.DEFAULT_SLOT)) {
+            onInstallationError(InstallationStep.ERROR, "Failed to start DSU installation session")
+            return
+        }
         installWritablePartition("userdata", userdataSize)
+        if (installationJob.isCancelled) {
+            return
+        }
         when (dsuInstallation.type) {
             Type.SINGLE_SYSTEM_IMAGE -> {
                 installImage(
@@ -267,7 +301,10 @@ class DSUInstaller(
             else -> {}
         }
         if (!installationJob.isCancelled) {
-            finishInstallation()
+            if (!finishInstallation()) {
+                onInstallationError(InstallationStep.ERROR, "finishInstallation() returned false")
+                return
+            }
             AppLogger.i(tag, "Installation finished successfully")
             onInstallationSuccess()
         }
@@ -301,7 +338,7 @@ class DSUInstaller(
         }
     }
 
-    fun createNewPartition(partition: String, partitionSize: Long, readOnly: Boolean) {
+    fun createNewPartition(partition: String, partitionSize: Long, readOnly: Boolean): Boolean {
         val result = createPartition(partition, partitionSize, readOnly)
         if (result != IGsiService.INSTALL_OK) {
             AppLogger.e(
@@ -315,10 +352,18 @@ class DSUInstaller(
             )
             installationJob.cancel()
             onInstallationError(InstallationStep.ERROR_CREATE_PARTITION, partition)
+            return false
         }
+        return true
     }
 
     override fun invoke() {
-        startInstallation()
+        runCatching { startInstallation() }.onFailure {
+            AppLogger.e(tag, "Unexpected installer failure", it)
+            onInstallationError(
+                InstallationStep.ERROR,
+                it.message ?: "Unexpected installer failure",
+            )
+        }
     }
 }

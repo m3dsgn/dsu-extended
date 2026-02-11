@@ -166,9 +166,21 @@ fun Navigation() {
                 fun navigate(destination: String) {
                     if (destination == Destinations.Up) {
                         navController.navigateUp()
-                    } else {
-                        navController.navigate(destination)
+                        return
                     }
+
+                    if (isMainTabRoute(destination)) {
+                        navController.navigate(destination) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(Destinations.Homepage) {
+                                saveState = true
+                            }
+                        }
+                        return
+                    }
+
+                    navController.navigate(destination)
                 }
 
                 composable(

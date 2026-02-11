@@ -11,12 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlin.system.exitProcess
 import kotlinx.coroutines.flow.collectLatest
+import com.dsu.extended.MainActivity
 import com.dsu.extended.R
 import com.dsu.extended.ui.cards.DsuInfoCard
 import com.dsu.extended.ui.cards.ImageSizeCard
@@ -53,6 +55,7 @@ fun Home(
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalContext.current as? MainActivity
     val uriHandler = LocalUriHandler.current
     val uiStyle = LocalUiStyle.current
 
@@ -121,7 +124,11 @@ fun Home(
             if (uiState.passedInitialChecks && uiState.additionalCard == AdditionalCardState.NONE) {
                 InstallationCard(
                     uiState = uiState.installationCard,
-                    onClickInstall = { homeViewModel.onClickInstall() },
+                    onClickInstall = {
+                        activity?.requestPermissionsForCheckAll {
+                            homeViewModel.onClickInstall()
+                        } ?: homeViewModel.onClickInstall()
+                    },
                     onClickUnmountSdCardAndRetry = { homeViewModel.onClickUnmountSdCardAndRetry() },
                     onClickSetSeLinuxPermissive = { homeViewModel.onClickSetSeLinuxPermissive() },
                     onClickRetryInstallation = { homeViewModel.onClickRetryInstallation() },

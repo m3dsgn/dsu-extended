@@ -42,6 +42,7 @@ import com.dsu.extended.service.PrivilegedRootService
 import com.dsu.extended.service.PrivilegedService
 import com.dsu.extended.service.PrivilegedSystemService
 import com.dsu.extended.ui.screen.Navigation
+import com.dsu.extended.ui.theme.AppFontPreset
 import com.dsu.extended.ui.theme.ColorPaletteStyle
 import com.dsu.extended.ui.theme.DsuExtendedTheme
 import com.dsu.extended.ui.theme.ThemeMode
@@ -114,17 +115,27 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
         }
         val callback = checkAllPendingCallback ?: return
         checkAllPendingCallback = null
+        refreshOperationModeAndService()
         runOnUiThread {
             callback()
         }
     }
 
     fun requestPermissionsForCheckAll(onComplete: () -> Unit = {}) {
+        val hasRoot = runCatching { Shell.getShell().isRoot }.getOrDefault(false)
         val shizukuNeedsPermission = Shizuku.pingBinder() && !OperationModeUtils.isShizukuPermissionGranted(this)
         val dhizukuNeedsPermission =
             runCatching { Dhizuku.init(this) && !Dhizuku.isPermissionGranted() }.getOrDefault(false)
+        AppLogger.d(
+            tag,
+            "Check ALL requested",
+            "root" to hasRoot,
+            "shizukuNeedsPermission" to shizukuNeedsPermission,
+            "dhizukuNeedsPermission" to dhizukuNeedsPermission,
+        )
 
         if (!shizukuNeedsPermission && !dhizukuNeedsPermission) {
+            refreshOperationModeAndService()
             onComplete()
             return
         }
@@ -146,9 +157,12 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
         finishCheckAllIfReady()
     }
 
-    //
-    // Shizuku
-    //
+    private fun refreshOperationModeAndService() {
+        val previousMode = session.getOperationMode()
+        setupSessionOperationMode()
+        val currentMode = session.getOperationMode()
+        rebindServiceIfNeeded(previousMode, currentMode)
+    }
 
     val userServiceArgs =
         Shizuku.UserServiceArgs(
@@ -234,10 +248,6 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
         activeServiceMode = session.getOperationMode()
     }
 
-    //
-    // Dhizuku
-    //
-
     private fun askDhizukuPermission() {
         if (!Dhizuku.init(this)) {
             AppLogger.w(tag, "Dhizuku is not initialized, cannot request permission")
@@ -288,13 +298,8 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
         activeServiceMode = session.getOperationMode()
     }
 
-    //
-    // Root
-    //
-
     companion object {
         init {
-            // Shell.enableVerboseLogging = BuildConfig.DEBUG
             Shell.setDefaultBuilder(
                 Shell.Builder.create()
                     .setFlags(Shell.FLAG_REDIRECT_STDERR)
@@ -440,6 +445,9 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
             val uiStyle = UiStyle.fromPreference(stylePreference)
             val themeModePreference = preferences[stringPreferencesKey(AppPrefs.THEME_MODE)] ?: ThemeMode.SYSTEM.value
             val themeMode = ThemeMode.fromPreference(themeModePreference)
+            val fontPresetPreference =
+                preferences[stringPreferencesKey(AppPrefs.APP_FONT_PRESET)] ?: AppFontPreset.SYSTEM_DEFAULT.value
+            val appFontPreset = AppFontPreset.fromPreference(fontPresetPreference)
             val colorPalettePreference =
                 preferences[stringPreferencesKey(AppPrefs.MATERIAL_COLOR_STYLE)] ?: ColorPaletteStyle.TONAL_SPOT.value
             val colorPaletteStyle = ColorPaletteStyle.fromPreference(colorPalettePreference)
@@ -449,6 +457,7 @@ class MainActivity : ComponentActivity(), Shizuku.OnRequestPermissionResultListe
                 themeMode = themeMode,
                 dynamicColor = useDynamicColor,
                 colorPaletteStyle = colorPaletteStyle,
+                appFontPreset = appFontPreset,
             ) {
                 Navigation()
             }

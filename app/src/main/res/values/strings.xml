@@ -199,6 +199,11 @@
     <string name="theme_mode_light">Light</string>
     <string name="theme_mode_dark">Dark</string>
     <string name="theme_mode_oled">OLED Black</string>
+    <string name="app_font_title">App font</string>
+    <string name="app_font_system_default">System default</string>
+    <string name="app_font_google_sans_flex">Google Sans Flex</string>
+    <string name="app_font_roboto_flex">Roboto Flex</string>
+    <string name="app_font_manrope">Manrope</string>
 
     <string name="material_color_style">Material color style</string>
     <string name="material_color_style_tonal_spot">Tonal Spot</string>

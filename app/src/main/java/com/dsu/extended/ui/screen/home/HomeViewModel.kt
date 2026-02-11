@@ -267,7 +267,13 @@ class HomeViewModel @Inject constructor(
             "useBuiltinInstaller" to session.preferences.useBuiltinInstaller,
             "isRoot" to session.isRoot(),
         )
-        updateInstallationCard { it.copy(installationStep = InstallationStep.PROCESSING) }
+        updateInstallationCard {
+            it.copy(
+                installationStep = InstallationStep.PROCESSING,
+                installationProgress = 0f,
+                currentPartitionText = "",
+            )
+        }
         persistAutoModeSnapshot("start_installation")
 
         if (session.getOperationMode() == OperationMode.ADB) {
@@ -319,8 +325,7 @@ class HomeViewModel @Inject constructor(
         if (session.isRoot() || OperationModeUtils.isReadLogsPermissionGranted(application)) {
             startLogging()
         } else {
-            AppLogger.w(tag, "Read logs unavailable, progress tracking disabled")
-            updateInstallationCard { it.copy(installationStep = InstallationStep.INSTALL_SUCCESS) }
+            AppLogger.w(tag, "Read logs unavailable, live progress tracking disabled")
         }
     }
 
@@ -656,7 +661,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onInstallationProgressUpdate(progress: Float, partition: String) {
-        val previousState = uiState.value.installationCard
         val currentStep = uiState.value.installationCard.installationStep
         val progressStep =
             when (currentStep) {
@@ -669,18 +673,13 @@ class HomeViewModel @Inject constructor(
                 else -> InstallationStep.INSTALLING
             }
         val safeProgress = progress.coerceIn(0f, 1f)
-        val shouldKeepPreviousProgress =
-            previousState.installationStep == progressStep &&
-                previousState.currentPartitionText.equals(partition, ignoreCase = true) &&
-                safeProgress < previousState.installationProgress
-        val normalizedProgress =
-            if (shouldKeepPreviousProgress) {
-                previousState.installationProgress
-            } else {
-                safeProgress
-            }
+        val normalizedProgress = safeProgress
         updateInstallationCard {
-            it.copy(currentPartitionText = partition, installationProgress = normalizedProgress)
+            it.copy(
+                installationStep = progressStep,
+                currentPartitionText = partition,
+                installationProgress = normalizedProgress,
+            )
         }
         liveUpdateNotifier.showProgress(
             step = progressStep,
@@ -694,6 +693,7 @@ class HomeViewModel @Inject constructor(
             it.copy(
                 installationStep = InstallationStep.CREATING_PARTITION,
                 currentPartitionText = partition,
+                installationProgress = 0f,
             )
         }
         liveUpdateNotifier.showProgress(
